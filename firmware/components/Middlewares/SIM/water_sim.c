@@ -16,6 +16,9 @@
 #define H 16
 #define LED_COUNT (W * H)
 
+// 1=蛇形走线（每行反向），0=正常行优先
+#define SERPENTINE 1
+
 #define SIM_FPS 45
 
 #define LED_VAL_MAX_I 20
@@ -119,11 +122,16 @@ static uint8_t s_palette_idx = 0;
 static key_t s_key;
 
 static inline int led_index_row_major(int x, int y) {
+#if SERPENTINE
     if (y & 1)
         return y * W + (W - 1 - x);
     else
         return y * W + x;
+#else
+    return y * W + x;
+#endif
 }
+
 
 static inline float grid_get(const float* grid, int x, int y) {
     return grid[x * H + y];
