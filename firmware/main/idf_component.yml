@@ -16,3 +16,4 @@ dependencies:
   #   public: true
   espressif/led_strip: ^3.0.2
 
+  espressif/esp-dsp: ^1.7.0

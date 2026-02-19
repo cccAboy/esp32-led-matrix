@@ -1,8 +1,6 @@
 
 #include "flip.h"
 
-#include "dsps_mem.h"
-#include "dsps_math.h"
 #include "esp_heap_caps.h"
 
 #include <math.h>
@@ -83,13 +81,15 @@ struct FlipFluid {
     float flip_ratio;
 };
 
+void flip_without_dsps_destroy(FlipFluid* f);
+
 static void integrate_particles(int n, float* pos, float* vel, float dt,
                                 float gx, float gy) {
     const float dgx = gx * dt;
     const float dgy = gy * dt;
-    dsps_addc_f32(&vel[0], &vel[0], n, dgx, 2, 2);
-    dsps_addc_f32(&vel[1], &vel[1], n, dgy, 2, 2);
     for (int i = 0; i < n; i++) {
+        vel[2 * i + 0] += dgx;
+        vel[2 * i + 1] += dgy;
         pos[2 * i + 0] += vel[2 * i + 0] * dt;
         pos[2 * i + 1] += vel[2 * i + 1] * dt;
     }
@@ -106,7 +106,7 @@ static void push_particles_apart(int num_particles, float* pos,
     const int p_num_cells = p_num_x * p_num_y;
 
     // (a) 统计每个网格里有几个粒子
-    dsps_memset(num_cell_particles, 0, sizeof(int32_t) * p_num_cells);
+    memset(num_cell_particles, 0, sizeof(int32_t) * p_num_cells);
 
     for (int i = 0; i < num_particles; i++) {
         float x = pos[2 * i + 0];
@@ -171,8 +171,7 @@ static void push_particles_apart(int num_particles, float* pos,
                         if (d2 > min_dist2 || d2 == 0.0f)
                             continue;
 
-                        float d = 0.0f;
-                        dsps_sqrt_f32(&d2, &d, 1);
+                        float d = sqrtf(d2);
                         float s = (0.5f * (min_dist - d)) / d;
                         dx *= s;
                         dy *= s;
@@ -230,7 +229,7 @@ static void update_particle_density(int num_particles, float* pos,
                                     int f_num_y, float h, float f_inv_spacing) {
     const int n = f_num_y;
     const float h2 = 0.5f * h;
-    dsps_memset(particle_density, 0, sizeof(float) * (f_num_x * f_num_y));
+    memset(particle_density, 0, sizeof(float) * (f_num_x * f_num_y));
 
     for (int i = 0; i < num_particles; i++) {
         float x = pos[2 * i + 0];
@@ -286,12 +285,12 @@ static void transfer_velocities(int to_grid, float flip_ratio,
 
     if (to_grid) {
         size_t bytes = sizeof(float) * (size_t)f_num_x * (size_t)f_num_y;
-        dsps_memcpy(prev_u, u, bytes);
-        dsps_memcpy(prev_v, v, bytes);
-        dsps_memset(du, 0, bytes);
-        dsps_memset(dv, 0, bytes);
-        dsps_memset(u, 0, bytes);
-        dsps_memset(v, 0, bytes);
+        memcpy(prev_u, u, bytes);
+        memcpy(prev_v, v, bytes);
+        memset(du, 0, bytes);
+        memset(dv, 0, bytes);
+        memset(u, 0, bytes);
+        memset(v, 0, bytes);
 
         // 根据固体 s[] 设置 cell_type（边界 SOLID，其它 AIR）
         for (int i = 0; i < f_num_x * f_num_y; i++) {
@@ -432,9 +431,9 @@ static void solve_incompressibility(
     float density, int FLUID_CELL) {
     const int n = f_num_y;
     size_t bytes = sizeof(float) * (size_t)f_num_x * (size_t)f_num_y;
-    dsps_memset(p, 0, bytes);
-    dsps_memcpy(prev_u, u, bytes);
-    dsps_memcpy(prev_v, v, bytes);
+    memset(p, 0, bytes);
+    memcpy(prev_u, u, bytes);
+    memcpy(prev_v, v, bytes);
 
     float cp = (density * h) / dt;
 
@@ -510,14 +509,14 @@ static void get_led_grid(const FlipFluid* f, float* out_grid, int visible_x,
 }
 
 // 对外 API
-void flip_set_gravity_scale(FlipFluid* f, float gravity_scale) {
+void flip_without_dsps_set_gravity_scale(FlipFluid* f, float gravity_scale) {
     if (!f)
         return;
     f->gravity_scale = gravity_scale;
 }
 
-void flip_set_solver_quality(FlipFluid* f, int push_iters, int pressure_iters,
-                             float flip_ratio) {
+void flip_without_dsps_set_solver_quality(FlipFluid* f, int push_iters,
+                                          int pressure_iters, float flip_ratio) {
     if (!f)
         return;
 
@@ -546,7 +545,7 @@ static int alloc_floats(float** p, int count) {
     *p = (float*)heap_caps_aligned_alloc(
         16, bytes, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     if (*p) {
-        dsps_memset(*p, 0, bytes);
+        memset(*p, 0, bytes);
         return 1;
     }
     return 0;
@@ -556,8 +555,8 @@ static int alloc_i32(int32_t** p, int count) {
     return (*p != NULL);
 }
 
-FlipFluid* flip_create(float sim_w, float sim_h, int visible_res,
-                       float fill_ratio) {
+FlipFluid* flip_without_dsps_create(float sim_w, float sim_h, int visible_res,
+                                    float fill_ratio) {
     int sim_res = visible_res + 2;
     float tank_w = sim_w;
     float tank_h = sim_h;
@@ -622,7 +621,7 @@ FlipFluid* flip_create(float sim_w, float sim_h, int visible_res,
         !alloc_i32(&f->num_cell_particles, f->p_num_cells) ||
         !alloc_i32(&f->first_cell_particle, f->p_num_cells + 1) ||
         !alloc_i32(&f->cell_particle_ids, f->max_particles)) {
-        flip_destroy(f);
+        flip_without_dsps_destroy(f);
         return NULL;
     }
     // 初始化
@@ -656,7 +655,7 @@ FlipFluid* flip_create(float sim_w, float sim_h, int visible_res,
     return f;
 }
 
-void flip_destroy(FlipFluid* f) {
+void flip_without_dsps_destroy(FlipFluid* f) {
     if (!f)
         return;
     free(f->u);
@@ -677,7 +676,7 @@ void flip_destroy(FlipFluid* f) {
     free(f);
 }
 
-void flip_step(FlipFluid* f, float dt, float gx, float gy) {
+void flip_without_dsps_step(FlipFluid* f, float dt, float gx, float gy) {
     if (!f)
         return;
 
@@ -724,7 +723,7 @@ void flip_step(FlipFluid* f, float dt, float gx, float gy) {
                         f->AIR_CELL, f->FLUID_CELL, f->SOLID_CELL);
 }
 
-void flip_get_led_grid(const FlipFluid* f, float* out_grid) {
+void flip_without_dsps_get_led_grid(const FlipFluid* f, float* out_grid) {
     if (!f || !out_grid)
         return;
 

@@ -1,11 +1,13 @@
 set(src_dirs
     SIM
+    DOOM
     FLIP
     GRAVITY
 )
 
 set(include_dirs
     SIM
+    DOOM
     FLIP
     GRAVITY
 )
@@ -13,11 +15,8 @@ set(include_dirs
 set(requires
     BSP
     driver
-    esp_event
-    esp_wifi
-    esp_netif
-    nvs_flash
-    lwip
+    esp_timer
+    esp-dsp
 )
 
 idf_component_register(
