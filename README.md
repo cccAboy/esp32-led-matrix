@@ -4,7 +4,7 @@
 当前示例包含“流体/水波”类效果（参考 Flip 思路实现）和DOOM风格fire效果，后续会持续加入更多不同风格的效果与玩法。
 
 - 演示视频：【用esp32和flip把灯板变成会流动的水】 https://www.bilibili.com/video/BV1BoFoz6EGF/?share_source=copy_web&vd_source=7e1d93ad9ac103c6c0653b43edfdaebd
-- 演示视频2：
+- 演示视频2：【用doom算法实现跳动火花】 https://www.bilibili.com/video/BV124ZBBhEyS/?share_source=copy_web&vd_source=7e1d93ad9ac103c6c0653b43edfdaebd
 - 代码仓库：<https://github.com/cccAboy/esp32-led-matrix>
 - 嘉立创链接：https://oshwhub.com/ccbaw123/deng-ban-flip
 
