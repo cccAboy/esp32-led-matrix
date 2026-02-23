@@ -101,6 +101,14 @@ Note: Third-party libraries/components remain under their respective licenses.
 
 
 ---
+## Attribution
+
+Portions of the firmware are adapted/ported from work by **Matthias Müller (Ten Minute Physics)**,
+licensed under the MIT License.
+
+- Original source: https://github.com/matthias-research/pages
+- See `firmware/LICENSE` for the full license text.
+
 ## 致谢
 
 https://www.youtube.com/watch?v=XmzBREkK8kY

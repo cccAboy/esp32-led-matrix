@@ -1,4 +1,14 @@
+/*
+Portions of this file are adapted/ported from work by:
+  Copyright 2022 Matthias Müller - Ten Minute Physics
+  www.youtube.com/c/TenMinutePhysics
+  www.matthiasMueller.info/tenMinutePhysics
 
+Licensed under the MIT License. See firmware/LICENSE for the full text.
+
+Modifications/port to C:
+  Copyright 2026 cccAboy
+*/
 #include "flip.h"
 
 #include "dsps_mem.h"
