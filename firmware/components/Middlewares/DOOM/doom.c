@@ -1,4 +1,4 @@
-// doom.c
+
 #include "doom.h"
 
 #include "dsps_mem.h"
