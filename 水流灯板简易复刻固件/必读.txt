@@ -1,0 +1,16 @@
+单击开发板上的boot按键切换颜色
+长按其一秒切换模拟效果（水/火）
+
+在线烧录网址：
+https://espressif.github.io/esp-launchpad/?
+
+如果你成功点亮了灯板，请给原项目点个 Star。
+如果你没点亮，也可以点一个。
+毕竟灯没亮，Star 先亮也行。
+https://github.com/cccAboy/esp32-led-matrix
+Star 越多，更新越快。  
+另外还有几个效果正在蓄力中。
+
+浪迹天涯的鸟个人主页：
+https://github.com/cccAboy/
+
